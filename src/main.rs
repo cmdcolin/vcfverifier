@@ -1,5 +1,6 @@
 use clap::Parser;
 use faimm::IndexedFasta;
+use flate2::read::GzDecoder;
 use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
@@ -16,9 +17,7 @@ struct Args {
 
 fn main() -> Result<(), &'static str> {
     let args = Args::parse();
-    let fa = IndexedFasta::from_file(args.fasta).expect("Error opening fa");
-    let chr_index = fa.fai().tid("ctgA").expect("Cannot find chr in index");
-    let _v = fa.view(chr_index, 0, 50).expect("Cannot get .fa view");
+    let fa = IndexedFasta::from_file(args.fasta).expect("Error opening fasta file");
     let mut lineno = 0;
     let mut err = 0;
     if let Ok(lines) = read_lines(args.vcf) {
@@ -54,12 +53,14 @@ fn main() -> Result<(), &'static str> {
 }
 
 // from https://doc.rust-lang.org/rust-by-example/std_misc/file/read_lines.html#read_lines
-fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>>
+fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<flate2::read::GzDecoder<File>>>>
 where
     P: AsRef<Path>,
 {
     let file = File::open(filename)?;
-    Ok(io::BufReader::new(file).lines())
+
+    let reader = io::BufReader::new(GzDecoder::new(file));
+    Ok(reader.lines())
 }
 
 // get chr_name, pos, and ref_allele avoiding splitting the whole line (could be many genotypes)
