@@ -65,6 +65,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "faimm"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a3ae2bfb438d20b6b0a580278fddb4ff6af8c814f16cdaf689196e9efc3fd84d"
+dependencies = [
+ "indexmap",
+ "memmap2",
+]
+
+[[package]]
 name = "hashbrown"
 version = "0.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -100,6 +110,15 @@ name = "libc"
 version = "0.2.126"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "349d5a591cd28b49e1d1037471617a32ddcda5731b99419008085f72d5a53836"
+
+[[package]]
+name = "memmap2"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "00b6c2ebff6180198788f5db08d7ce3bc1d0b617176678831a7510825973e357"
+dependencies = [
+ "libc",
+]
 
 [[package]]
 name = "once_cell"
@@ -198,6 +217,7 @@ name = "vcfverifier"
 version = "0.1.0"
 dependencies = [
  "clap",
+ "faimm",
 ]
 
 [[package]]
