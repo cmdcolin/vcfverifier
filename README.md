@@ -41,3 +41,7 @@ vcfverifier --fasta ~/Downloads/hs37d5.fa --vcf   24.07s user 0.26s system 99% c
 ## Note
 
 My first rust project!
+
+Uses faimm to memory-map the indexed FASTA file, keeping memory usage low (the
+entire FASTA does not have to be loaded into memory and the VCF is read line by
+line) https://github.com/veldsla/faimm
