@@ -17,10 +17,22 @@ struct Args {
 
 fn main() -> Result<(), &'static str> {
     let args = Args::parse();
-    let fa = IndexedFasta::from_file(args.fasta).expect("Error opening fasta file");
+    let (lineno, err) = verify(&args.fasta, &args.vcf);
+    println!("Lines processed: {}", lineno);
+
+    if err != 0 {
+        Err("Found some mismatching lines")
+    } else {
+        println!("No mismatching lines found");
+        Ok(())
+    }
+}
+
+fn verify(fasta: &str, vcf: &str) -> (usize, usize) {
+    let fa = IndexedFasta::from_file(fasta).expect("Error opening fasta file");
     let mut lineno = 0;
     let mut err = 0;
-    let lines = get_reader(&args.vcf.to_string());
+    let lines = get_reader(vcf);
 
     for line in lines {
         lineno = lineno + 1;
@@ -37,19 +49,12 @@ fn main() -> Result<(), &'static str> {
                 .to_string();
 
             if fasta.to_lowercase() != ref_allele.to_lowercase() {
-                println!("Failed line {}: {}", lineno, ip);
+                println!("Failed line {}: {} {}", lineno, ip, fasta);
                 err = 1;
             }
         }
     }
-    println!("Lines processed: {}", lineno);
-
-    if err != 0 {
-        Err("Found some mismatching lines")
-    } else {
-        println!("No mismatching lines found");
-        Ok(())
-    }
+    return (lineno, err);
 }
 
 fn get_reader(path: &str) -> io::Lines<BufReader<Box<dyn Read>>> {
@@ -86,4 +91,42 @@ fn get_columns(s: &str) -> (&str, usize, &str) {
     let ref_allele = &s[i..l];
     let pos: usize = posstr.parse::<usize>().unwrap() - 1;
     (chr_name, pos, ref_allele)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn plaintext_vcf() {
+        let (lineno, err) = verify("test/volvox.fa", "test/volvox.filtered.vcf");
+        assert_eq!(lineno, 73);
+        assert_eq!(err, 0);
+    }
+
+    #[test]
+    fn gzip_vcf() {
+        let (lineno, err) = verify("test/volvox.fa", "test/volvox.filtered.vcf.gz");
+        assert_eq!(lineno, 73);
+        assert_eq!(err, 0);
+    }
+
+    #[test]
+    fn bgzip_vcf() {
+        let (lineno, err) = verify("test/volvox.fa", "test/volvox.filtered.vcf.gz");
+        assert_eq!(lineno, 73);
+        assert_eq!(err, 0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn missing_vcf() {
+        verify("test/volvox.fa", "missing.gz");
+    }
+
+    #[test]
+    #[should_panic]
+    fn missing_fasta() {
+        verify("missing.fa", "missing.gz");
+    }
 }
