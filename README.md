@@ -11,7 +11,7 @@ First install rust, probably with rustup https://rustup.rs/
 Then
 
 ```
-cargo install --git https://github.com/cmdcolin/vcfverifier
+cargo install vcfverifier
 ```
 
 ## Usage

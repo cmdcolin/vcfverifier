@@ -3,6 +3,9 @@ name = "vcfverifier"
 version = "0.1.0"
 edition = "2021"
 license = "MIT"
+readme = "README.md"
+repository = "https://github.com/cmdcolin/vcfverifier"
+description = "Verifies that a given VCF matches a given FASTA by comparing the REF column in the VCF to the underlying FASTA sequences"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
