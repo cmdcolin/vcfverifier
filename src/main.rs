@@ -4,6 +4,7 @@ use rust_htslib::bgzf::Reader;
 use std::fs::File;
 use std::io;
 use std::io::{BufRead, BufReader, Read};
+use std::path::Path;
 
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
@@ -58,23 +59,23 @@ fn verify(fasta: &str, vcf: &str) -> (usize, usize) {
 }
 
 fn get_reader(path: &str) -> io::Lines<BufReader<Box<dyn Read>>> {
-    let file_type = path
-        .split(".")
-        .collect::<Vec<&str>>()
-        .last()
-        .unwrap()
-        .clone();
-
-    match file_type {
-        "gz" => {
-            let mm: Box<dyn Read> = Box::new(Reader::from_path(path).unwrap());
-            BufReader::new(mm).lines()
-        }
-        _t => {
+    match Path::new(&path).extension() {
+        None => {
             let file = File::open(path).unwrap();
             let mm: Box<dyn Read> = Box::new(file);
             BufReader::new(mm).lines()
         }
+        Some(os_str) => match os_str.to_str() {
+            Some("gz") => {
+                let mm: Box<dyn Read> = Box::new(Reader::from_path(path).unwrap());
+                BufReader::new(mm).lines()
+            }
+            _t => {
+                let file = File::open(path).unwrap();
+                let mm: Box<dyn Read> = Box::new(file);
+                BufReader::new(mm).lines()
+            }
+        },
     }
 }
 
